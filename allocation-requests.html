@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Allocation Requests | Hostel Admin</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        * { box-sizing: border-box; }
+
+        .page {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #102a43, #2563a6);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+        }
+
+        .panel {
+            background: white;
+            padding: 22px;
+            margin-top: 22px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px #00000012;
+        }
+
+        .table-wrap { overflow-x: auto; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 950px;
+        }
+
+        th, td {
+            padding: 13px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #f1f5f9;
+            color: #334155;
+        }
+
+        button {
+            padding: 9px 12px;
+            border: none;
+            border-radius: 7px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 3px;
+        }
+
+        button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        .approve { background: #15803d; }
+        .reject { background: #dc2626; }
+
+        .status {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 20px;
+            background: #fef3c7;
+            color: #92400e;
+            font-size: 13px;
+        }
+
+        .message {
+            margin: 15px 0;
+            color: #475569;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 18px;
+            background: #102a43;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+
+        @media (max-width: 600px) {
+            .page { padding: 12px; }
+            .header, .panel { padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+<main class="page">
+    <header class="header">
+        <h1>📋 Allocation Requests</h1>
+        <p>Review, approve or reject hostel room requests.</p>
+    </header>
+
+    <section class="panel">
+        <h2>Student Requests</h2>
+        <p id="summary">Loading requests...</p>
+        <p id="message" class="message" role="status"></p>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Student ID</th>
+                        <th>Email</th>
+                        <th>Department / Year</th>
+                        <th>Requested Room</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="requestRows"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <a href="admin-dashboard.html" class="back">
+        ← Back to Dashboard
+    </a>
+</main>
+
+<script>
+   const API_URL = "https://hostelroomallocationsystem-production-cc01.up.railway.app/api";
+    const message = document.getElementById("message");
+    const summary = document.getElementById("summary");
+
+    function addCell(row, value) {
+        const cell = document.createElement("td");
+        cell.textContent = value ?? "—";
+        row.appendChild(cell);
+        return cell;
+    }
+
+    async function processRequest(requestId, action) {
+        const approved = action === "approve";
+
+        const confirmed = window.confirm(
+            approved
+                ? "Approve this student room request?"
+                : "Reject this student room request?"
+        );
+
+        if (!confirmed) return;
+
+        message.textContent = "Processing request...";
+
+        try {
+            const response = await fetch(
+                `${API_URL}/admin/requests/${requestId}/${action}`,
+                { method: "PATCH" }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || "Action failed.");
+            }
+
+            message.textContent = data.message;
+            await loadRequests();
+        } catch (error) {
+            message.textContent = error.message;
+            console.error("Request action error:", error);
+        }
+    }
+
+    async function loadRequests() {
+        rows.replaceChildren();
+        summary.textContent = "Loading requests...";
+
+        try {
+            const response = await fetch(
+                `${API_URL}/admin/requests`
+            );
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success ||
+                !Array.isArray(data.requests)) {
+                throw new Error(
+                    data.message || "Could not load requests."
+                );
+            }
+
+            const requests = data.requests;
+            summary.textContent = `Total requests: ${requests.length}`;
+
+            if (requests.length === 0) {
+                message.textContent = "No allocation requests found.";
+                return;
+            }
+
+            message.textContent = "";
+
+            requests.forEach(request => {
+                const row = document.createElement("tr");
+
+                addCell(row, request.student_name);
+                addCell(row, request.student_id);
+                addCell(row, request.student_email);
+                addCell(
+                    row,
+                    `${request.department} / ${request.study_year}`
+                );
+                addCell(row, request.room_number || "Room not found");
+
+                const statusCell = addCell(row, "");
+                const badge = document.createElement("span");
+                badge.className = "status";
+                badge.textContent = request.status;
+                statusCell.appendChild(badge);
+
+                const actionCell = document.createElement("td");
+
+                if (request.status === "Pending") {
+                    const approveButton = document.createElement("button");
+                    approveButton.className = "approve";
+                    approveButton.textContent = "Approve";
+                    approveButton.addEventListener("click", () => {
+                        processRequest(request.id, "approve");
+                    });
+
+                    const rejectButton = document.createElement("button");
+                    rejectButton.className = "reject";
+                    rejectButton.textContent = "Reject";
+                    rejectButton.addEventListener("click", () => {
+                        processRequest(request.id, "reject");
+                    });
+
+                    actionCell.append(approveButton, rejectButton);
+                } else {
+                    actionCell.textContent = "Processed";
+                }
+
+                row.appendChild(actionCell);
+                rows.appendChild(row);
+            });
+        } catch (error) {
+            summary.textContent = "Requests unavailable";
+            message.textContent =
+                "Could not load requests. Check the backend server.";
+            console.error("Load requests error:", error);
+        }
+    }
+
+    loadRequests();
+</script>
+</body>
+</html>

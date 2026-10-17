@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <titleHostel Room Allocation System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <h1>Hostel Room Allocation System</h1>
+
+    <main>
+ 
+<div style="text-align: right; margin-bottom: 15px;">
+  <a href="admin-login.html" class="admin-login-link">Admin Login</a>
+</div>
+
+        <!-- Student Registration -->
+        <section class="card" id="registrationSection">
+            <h2>Student Registration</h2>
+
+            <form id="studentForm">
+
+                <label for="studentName">Student Name</label>
+                <input
+                    type="text"
+                    id="studentName"
+                    placeholder="Enter your name"
+                    pattern="[A-Za-z ]+"
+                    title="Student name-la letters and spaces mattum enter pannunga"
+                    oninput="this.value = this.value.replace(/[^A-Za-z ]/g, '')"
+                    required
+                >
+
+                <label for="studentId">Student ID</label>
+                <input
+                    type="text"
+                    id="studentId"
+                    placeholder="Enter your student ID"
+                    inputmode="numeric"
+                    pattern="[0-9]+"
+                    title="Student ID-la numbers mattum enter pannunga"
+                    oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                    required
+                >
+
+                <label for="studentEmail">Email Address</label>
+                <input
+                    type="email"
+                    id="studentEmail"
+                    placeholder="Enter your email"
+                    required
+                >
+
+                <label for="studentDepartment">Department</label>
+                <select id="studentDepartment" required>
+                    <option value="">Select Department</option>
+                    <option value="CSE">Computer Science Engineering</option>
+                    <option value="IT">Information Technology</option>
+                    <option value="ECE">Electronics and Communication</option>
+                    <option value="EEE">Electrical and Electronics</option>
+                    <option value="MECH">Mechanical Engineering</option>
+                    <option value="CIVIL">Civil Engineering</option>
+                    <option value="AIDS">AI and Data Science</option>
+                    <option value="OTHER">Other</option>
+                </select>
+
+                <label for="studentYear">Year of Study</label>
+                <select id="studentYear" required>
+                    <option value="">Select Year</option>
+                    <option value="1st Year">1st Year</option>
+                    <option value="2nd Year">2nd Year</option>
+                    <option value="3rd Year">3rd Year</option>
+                    <option value="4th Year">4th Year</option>
+                </select>
+
+                <button type="submit">Register Student</button>
+            </form>
+
+            <p id="formMessage"></p>
+        </section>
+
+
+        <!-- Room Selection -->
+        <section class="card" id="roomSection" style="display: none;">
+            <h2>Select Your Hostel Room</h2>
+
+            <p>Select your preferred sharing type to view available rooms.</p>
+
+            <label for="roomType">Preferred Room Type</label>
+            <select id="roomType" required>
+                <option value="2">2 Sharing</option>
+                <option value="3">3 Sharing</option>
+                <option value="4">4 Sharing</option>
+                <option value="6">6 Sharing</option>
+            </select>
+
+            <button type="button" id="showRoomsButton">
+                Show Available Rooms
+            </button>
+
+            <div id="roomTable"></div>
+
+            <div id="roomSelectionArea" style="display: none;">
+                <label for="selectedRoom">Choose Your Room</label>
+                <select id="selectedRoom" required>
+                    <option value="">Select a room</option>
+                </select>
+
+                <button type="button" id="confirmRoomButton">
+                    Confirm My Room
+                </button>
+            </div>
+        </section>
+
+
+        <!-- Allocation Confirmation -->
+        <section class="card" id="allocationSection"
+            style="display: none;">
+
+            <h2>Room Allocation Confirmation</h2>
+
+            <p id="allocationMessage"></p>
+            <div id="allocationDetails"></div>
+
+            <div id="roomChangeButtonContainer"
+                style="display: none;">
+
+                <button type="button" id="showRoomChangeButton">
+                    Request to Change Room
+                </button>
+            </div>
+        </section>
+
+
+        <!-- Room Change Request -->
+        <section class="card" id="roomChangeSection"
+            style="display: none;">
+
+            <h2>Request to Change Room</h2>
+
+            <p>
+                Select your preferred room type and provide a reason
+                for requesting the change.
+            </p>
+
+            <div id="currentRoomDetails"></div>
+
+            <form id="roomChangeForm">
+
+                <label for="preferredChangeType">
+                    Preferred Room Type
+                </label>
+
+                <select id="preferredChangeType" required>
+                    <option value="">Select Room Type</option>
+                    <option value="2">2 Sharing</option>
+                    <option value="3">3 Sharing</option>
+                    <option value="4">4 Sharing</option>
+                    <option value="6">6 Sharing</option>
+                </select>
+
+                <label for="changeReason">Reason for Room Change</label>
+
+                <textarea id="changeReason"
+                    rows="4"
+                    placeholder="Enter your reason for changing the room"
+                    required></textarea>
+
+                <button type="submit" id="submitChangeButton">
+                    Submit Request
+                </button>
+            </form>
+
+            <p id="changeMessage"></p>
+            <div id="requestStatus"></div>
+        </section>
+
+    </main>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

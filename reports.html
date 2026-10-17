@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Hostel Reports</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            color: #102a43;
+        }
+
+        .page {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #102a43, #2563a6);
+            color: white;
+            padding: 28px;
+            border-radius: 14px;
+            box-shadow: 0 5px 18px #00000020;
+        }
+
+        .header h1 {
+            margin-top: 0;
+        }
+
+        .header p {
+            margin-bottom: 0;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 18px;
+            margin: 25px 0;
+        }
+
+        .card {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px #00000012;
+            border-left: 5px solid #2563eb;
+        }
+
+        .card h2 {
+            font-size: 15px;
+            color: #475569;
+            margin: 0 0 12px;
+        }
+
+        .card p {
+            font-size: 30px;
+            font-weight: bold;
+            color: #102a43;
+            margin: 0;
+        }
+
+        .panel {
+            background: white;
+            padding: 24px;
+            margin-top: 22px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px #00000012;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        th, td {
+            padding: 13px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #f1f5f9;
+            color: #334155;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .approved {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .button {
+            padding: 11px 18px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 18px;
+            background: #102a43;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+
+        .message {
+            color: #475569;
+            margin: 15px 0;
+        }
+
+        .error {
+            color: #b91c1c;
+        }
+
+        @media (max-width: 600px) {
+            .page {
+                padding: 12px;
+                margin: 10px auto;
+            }
+
+            .header, .panel {
+                padding: 17px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<main class="page">
+
+    <header class="header">
+        <h1>📊 Hostel Reports</h1>
+        <p>View room occupancy and student allocation summaries.</p>
+    </header>
+
+    <section class="cards">
+        <div class="card">
+            <h2>Total Rooms</h2>
+            <p id="totalRooms">—</p>
+        </div>
+
+        <div class="card">
+            <h2>Total Bed Capacity</h2>
+            <p id="totalBeds">—</p>
+        </div>
+
+        <div class="card">
+            <h2>Occupied Beds</h2>
+            <p id="occupiedBeds">—</p>
+        </div>
+
+        <div class="card">
+            <h2>Available Beds</h2>
+            <p id="availableBeds">—</p>
+        </div>
+
+        <div class="card">
+            <h2>Pending Requests</h2>
+            <p id="pendingRequests">—</p>
+        </div>
+
+        <div class="card">
+            <h2>Approved Requests</h2>
+            <p id="approvedRequests">—</p>
+        </div>
+
+        <div class="card">
+            <h2>Rejected Requests</h2>
+            <p id="rejectedRequests">—</p>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>Allocation Request Report</h2>
+
+        <p id="reportMessage" class="message" role="status">
+            Loading report data...
+        </p>
+
+        <button id="refreshButton" class="button" type="button">
+            Refresh Reports
+        </button>
+
+        <p id="requestCount" class="message"></p>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Student ID</th>
+                        <th>Room Number</th>
+                        <th>Sharing Type</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody id="requestRows"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>Room Occupancy Report</h2>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Room Number</th>
+                        <th>Floor</th>
+                        <th>Sharing Type</th>
+                        <th>Capacity</th>
+                        <th>Occupied</th>
+                        <th>Available Beds</th>
+                    </tr>
+                </thead>
+
+                <tbody id="roomRows"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <a href="admin-dashboard.html" class="back">
+        ← Back to Dashboard
+    </a>
+
+</main>
+
+<script>
+   const API_URL = "https://hostelroomallocationsystem-production-cc01.up.railway.app/api";
+
+    const reportMessage = document.getElementById("reportMessage");
+    const refreshButton = document.getElementById("refreshButton");
+    const requestRows = document.getElementById("requestRows");
+    const roomRows = document.getElementById("roomRows");
+
+    function setText(id, value) {
+        document.getElementById(id).textContent = value;
+    }
+
+    function getFloor(roomNumber) {
+        const number = String(roomNumber || "").toUpperCase();
+
+        if (number.startsWith("G")) return "Ground Floor";
+        if (number.startsWith("F")) return "1st Floor";
+        if (number.startsWith("S")) return "2nd Floor";
+        if (number.startsWith("T")) return "3rd Floor";
+
+        return "Unknown Floor";
+    }
+
+    function getSharing(room) {
+        const match = String(room.room_type || "").match(/\d+/);
+
+        return Number(match ? match[0] : room.capacity);
+    }
+
+    function addCell(row, value) {
+        const cell = document.createElement("td");
+        cell.textContent = value ?? "—";
+        row.appendChild(cell);
+        return cell;
+    }
+
+    function showEmptyRow(tbody, message, columns) {
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+
+        cell.colSpan = columns;
+        cell.textContent = message;
+
+        row.appendChild(cell);
+        tbody.appendChild(row);
+    }
+
+    function displayRooms(rooms) {
+        roomRows.replaceChildren();
+
+        if (rooms.length === 0) {
+            showEmptyRow(roomRows, "No room records found.", 6);
+            return;
+        }
+
+        rooms.forEach(room => {
+            const row = document.createElement("tr");
+            const capacity = Number(room.capacity) || 0;
+            const occupied = Number(room.occupied) || 0;
+            const available = Math.max(0, capacity - occupied);
+
+            addCell(row, room.room_number);
+            addCell(row, getFloor(room.room_number));
+            addCell(row, `${getSharing(room)} Sharing`);
+            addCell(row, capacity);
+            addCell(row, occupied);
+            addCell(row, available);
+
+            roomRows.appendChild(row);
+        });
+    }
+
+    function displayRequests(requests) {
+        requestRows.replaceChildren();
+
+        if (requests.length === 0) {
+            showEmptyRow(requestRows, "No allocation requests found.", 5);
+            return;
+        }
+
+        requests.forEach(request => {
+            const row = document.createElement("tr");
+
+            addCell(row, request.student_name);
+            addCell(row, request.student_id);
+            addCell(row, request.room_number || "Not assigned");
+            addCell(row, `${request.preferred_room_type || "—"} Sharing`);
+
+            const statusCell = document.createElement("td");
+            const badge = document.createElement("span");
+            const status = String(request.status || "Unknown");
+            const normalized = status.toLowerCase();
+
+            badge.className = "status";
+
+            if (normalized === "pending") {
+                badge.classList.add("pending");
+            } else if (normalized === "approved") {
+                badge.classList.add("approved");
+            } else if (normalized === "rejected") {
+                badge.classList.add("rejected");
+            }
+
+            badge.textContent = status;
+            statusCell.appendChild(badge);
+            row.appendChild(statusCell);
+
+            requestRows.appendChild(row);
+        });
+    }
+
+    async function loadReports() {
+        refreshButton.disabled = true;
+        reportMessage.classList.remove("error");
+        reportMessage.textContent = "Loading report data...";
+
+        try {
+            const [roomResponse, requestResponse] = await Promise.all([
+                fetch(`${API_URL}/rooms`),
+                fetch(`${API_URL}/admin/requests`)
+            ]);
+
+            if (!roomResponse.ok || !requestResponse.ok) {
+                throw new Error("A backend request failed.");
+            }
+
+            const roomData = await roomResponse.json();
+            const requestData = await requestResponse.json();
+
+            if (
+                !roomData.success ||
+                !Array.isArray(roomData.rooms) ||
+                !requestData.success ||
+                !Array.isArray(requestData.requests)
+            ) {
+                throw new Error("The backend returned invalid report data.");
+            }
+
+            const rooms = roomData.rooms;
+            const requests = requestData.requests;
+
+            const totalBeds = rooms.reduce(
+                (sum, room) => sum + (Number(room.capacity) || 0),
+                0
+            );
+
+            const occupiedBeds = rooms.reduce(
+                (sum, room) => sum + (Number(room.occupied) || 0),
+                0
+            );
+
+            const availableBeds = rooms.reduce(
+                (sum, room) =>
+                    sum + Math.max(
+                        0,
+                        (Number(room.capacity) || 0) -
+                        (Number(room.occupied) || 0)
+                    ),
+                0
+            );
+
+            const countStatus = status =>
+                requests.filter(request =>
+                    String(request.status || "").toLowerCase() === status
+                ).length;
+
+            setText("totalRooms", rooms.length);
+            setText("totalBeds", totalBeds);
+            setText("occupiedBeds", occupiedBeds);
+            setText("availableBeds", availableBeds);
+            setText("pendingRequests", countStatus("pending"));
+            setText("approvedRequests", countStatus("approved"));
+            setText("rejectedRequests", countStatus("rejected"));
+
+            displayRooms(rooms);
+            displayRequests(requests);
+
+            setText(
+                "requestCount",
+                `Total allocation requests: ${requests.length}`
+            );
+
+            reportMessage.textContent =
+                "Reports loaded successfully from the backend.";
+        } catch (error) {
+            console.error("Reports loading error:", error);
+
+            reportMessage.textContent =
+                "Could not load reports. Please check the backend server.";
+            reportMessage.classList.add("error");
+
+            [
+                "totalRooms",
+                "totalBeds",
+                "occupiedBeds",
+                "availableBeds",
+                "pendingRequests",
+                "approvedRequests",
+                "rejectedRequests"
+            ].forEach(id => setText(id, "—"));
+
+            requestRows.replaceChildren();
+            roomRows.replaceChildren();
+            setText("requestCount", "");
+        } finally {
+            refreshButton.disabled = false;
+        }
+    }
+
+    refreshButton.addEventListener("click", loadReports);
+
+    loadReports();
+</script>
+</body>
+</html>

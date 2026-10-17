@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Room Management | Hostel Admin</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            color: #102a43;
+        }
+
+        .page {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #102a43, #2563a6);
+            color: white;
+            padding: 28px;
+            border-radius: 14px;
+            box-shadow: 0 5px 18px #00000020;
+        }
+
+        .header h1 {
+            margin-top: 0;
+        }
+
+        .header p {
+            margin-bottom: 0;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 18px;
+            margin: 24px 0;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px #00000012;
+            border-left: 5px solid #2563eb;
+        }
+
+        .summary-card h2 {
+            color: #475569;
+            font-size: 15px;
+            margin: 0 0 12px;
+        }
+
+        .summary-card p {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 0;
+            color: #102a43;
+        }
+
+        .panel {
+            background: white;
+            padding: 24px;
+            margin-top: 22px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px #00000012;
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .filters label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 7px;
+        }
+
+        .filters input,
+        .filters select {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #cbd5e1;
+            border-radius: 7px;
+            background: white;
+            color: #102a43;
+        }
+
+        .button {
+            padding: 11px 17px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .button:hover {
+            background: #1d4ed8;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            min-width: 800px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 13px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #f1f5f9;
+            color: #334155;
+        }
+
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .status-available {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-full {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-other {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .message {
+            margin: 16px 0;
+            color: #475569;
+        }
+
+        .error {
+            color: #b91c1c;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 18px;
+            background: #102a43;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+
+        .back:hover {
+            background: #1e3a5f;
+        }
+
+        @media (max-width: 600px) {
+            .page {
+                padding: 12px;
+                margin: 10px auto;
+            }
+
+            .header, .panel {
+                padding: 17px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<main class="page">
+
+    <header class="header">
+        <h1>🏢 Room Management</h1>
+        <p>View hostel rooms, floors, capacities and availability.</p>
+    </header>
+
+    <section class="summary-grid">
+        <div class="summary-card">
+            <h2>Total Rooms</h2>
+            <p id="totalRooms">—</p>
+        </div>
+
+        <div class="summary-card">
+            <h2>Rooms With Availability</h2>
+            <p id="availableRooms">—</p>
+        </div>
+
+        <div class="summary-card">
+            <h2>Occupied Beds</h2>
+            <p id="occupiedBeds">—</p>
+        </div>
+
+        <div class="summary-card">
+            <h2>Total Bed Capacity</h2>
+            <p id="totalBeds">—</p>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>Hostel Room Details</h2>
+
+        <p id="message" class="message" role="status">
+            Loading room details...
+        </p>
+
+        <div class="filters">
+            <div>
+                <label for="searchRoom">Search Room</label>
+                <input
+                    type="search"
+                    id="searchRoom"
+                    placeholder="Enter room number"
+                >
+            </div>
+
+            <div>
+                <label for="filterFloor">Filter by Floor</label>
+                <select id="filterFloor">
+                    <option value="">All Floors</option>
+                    <option value="Ground Floor">Ground Floor</option>
+                    <option value="1st Floor">1st Floor</option>
+                    <option value="2nd Floor">2nd Floor</option>
+                    <option value="3rd Floor">3rd Floor</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="filterSharing">Filter by Sharing</label>
+                <select id="filterSharing">
+                    <option value="">All Sharing Types</option>
+                    <option value="2">2 Sharing</option>
+                    <option value="3">3 Sharing</option>
+                    <option value="4">4 Sharing</option>
+                    <option value="6">6 Sharing</option>
+                </select>
+            </div>
+        </div>
+
+        <button type="button" class="button" id="refreshButton">
+            Refresh Rooms
+        </button>
+
+        <p id="resultCount" class="message"></p>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Room Number</th>
+                        <th>Floor</th>
+                        <th>Sharing Type</th>
+                        <th>Capacity</th>
+                        <th>Occupied Beds</th>
+                        <th>Available Beds</th>
+                        <th>Monthly Fee</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody id="roomRows"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <a href="admin-dashboard.html" class="back">
+        ← Back to Dashboard
+    </a>
+</main>
+
+<script>
+  const API_URL = "https://hostelroomallocationsystem-production-cc01.up.railway.app/api";
+
+    let allRooms = [];
+
+    const roomRows = document.getElementById("roomRows");
+    const message = document.getElementById("message");
+    const resultCount = document.getElementById("resultCount");
+
+    const searchRoom = document.getElementById("searchRoom");
+    const filterFloor = document.getElementById("filterFloor");
+    const filterSharing = document.getElementById("filterSharing");
+    const refreshButton = document.getElementById("refreshButton");
+
+    function getFloor(roomNumber) {
+        const number = String(roomNumber || "").toUpperCase();
+
+        if (number.startsWith("G")) return "Ground Floor";
+        if (number.startsWith("F")) return "1st Floor";
+        if (number.startsWith("S")) return "2nd Floor";
+        if (number.startsWith("T")) return "3rd Floor";
+
+        return "Unknown Floor";
+    }
+
+    function getSharing(room) {
+        const match = String(room.room_type || "").match(/\d+/);
+
+        return Number(match ? match[0] : room.capacity);
+    }
+
+    function getStatus(room) {
+        if (
+            Number(room.occupied) >= Number(room.capacity) ||
+            String(room.status).toLowerCase() === "full"
+        ) {
+            return "Full";
+        }
+
+        if (Number(room.occupied) < Number(room.capacity)) {
+            return "Available";
+        }
+
+        return room.status || "Unknown";
+    }
+
+    function setSummary(rooms) {
+        document.getElementById("totalRooms").textContent =
+            rooms.length;
+
+        document.getElementById("availableRooms").textContent =
+            rooms.filter(room => getStatus(room) === "Available").length;
+
+        document.getElementById("occupiedBeds").textContent =
+            rooms.reduce(
+                (total, room) =>
+                    total + Number(room.occupied || 0),
+                0
+            );
+
+        document.getElementById("totalBeds").textContent =
+            rooms.reduce(
+                (total, room) =>
+                    total + Number(room.capacity || 0),
+                0
+            );
+    }
+
+    function addCell(row, value) {
+        const cell = document.createElement("td");
+        cell.textContent = value;
+        row.appendChild(cell);
+        return cell;
+    }
+
+    function displayRooms() {
+        const search = searchRoom.value.trim().toLowerCase();
+        const floor = filterFloor.value;
+        const sharing = filterSharing.value;
+
+        const filteredRooms = allRooms.filter(room => {
+            const matchesSearch =
+                String(room.room_number).toLowerCase().includes(search);
+
+            const matchesFloor =
+                !floor || getFloor(room.room_number) === floor;
+
+            const matchesSharing =
+                !sharing || getSharing(room) === Number(sharing);
+
+            return matchesSearch && matchesFloor && matchesSharing;
+        });
+
+        roomRows.replaceChildren();
+
+        if (filteredRooms.length === 0) {
+            const row = document.createElement("tr");
+            const cell = document.createElement("td");
+
+            cell.colSpan = 8;
+            cell.textContent = "No rooms match your search.";
+            row.appendChild(cell);
+            roomRows.appendChild(row);
+        }
+
+        filteredRooms.forEach(room => {
+            const row = document.createElement("tr");
+
+            addCell(row, room.room_number);
+            addCell(row, getFloor(room.room_number));
+            addCell(row, `${getSharing(room)} Sharing`);
+            addCell(row, Number(room.capacity));
+            addCell(row, Number(room.occupied));
+            addCell(
+                row,
+                Math.max(
+                    0,
+                    Number(room.capacity) - Number(room.occupied)
+                )
+            );
+            addCell(row, `₹${Number(room.monthly_fee).toLocaleString("en-IN")}`);
+
+            const statusCell = document.createElement("td");
+            const badge = document.createElement("span");
+            const status = getStatus(room);
+
+            badge.className = "status " +
+                (status === "Available"
+                    ? "status-available"
+                    : status === "Full"
+                        ? "status-full"
+                        : "status-other");
+
+            badge.textContent = status;
+            statusCell.appendChild(badge);
+            row.appendChild(statusCell);
+
+            roomRows.appendChild(row);
+        });
+
+        resultCount.textContent =
+            `Showing ${filteredRooms.length} of ${allRooms.length} rooms.`;
+    }
+
+    async function loadRooms() {
+        refreshButton.disabled = true;
+        message.textContent = "Loading room details...";
+        message.classList.remove("error");
+
+        try {
+            const response = await fetch(`${API_URL}/rooms`);
+            const data = await response.json();
+
+            if (!response.ok || !data.success ||
+                !Array.isArray(data.rooms)) {
+                throw new Error(data.message || "Unable to load rooms.");
+            }
+
+            allRooms = data.rooms;
+
+            setSummary(allRooms);
+            displayRooms();
+
+            message.textContent =
+                "Room details loaded successfully.";
+        } catch (error) {
+            console.error("Room management error:", error);
+
+            message.textContent =
+                "Could not load rooms. Please check the backend server.";
+            message.classList.add("error");
+
+            roomRows.replaceChildren();
+
+            document.getElementById("totalRooms").textContent = "—";
+            document.getElementById("availableRooms").textContent = "—";
+            document.getElementById("occupiedBeds").textContent = "—";
+            document.getElementById("totalBeds").textContent = "—";
+
+            resultCount.textContent = "";
+        } finally {
+            refreshButton.disabled = false;
+        }
+    }
+
+    searchRoom.addEventListener("input", displayRooms);
+    filterFloor.addEventListener("change", displayRooms);
+    filterSharing.addEventListener("change", displayRooms);
+    refreshButton.addEventListener("click", loadRooms);
+
+    loadRooms();
+</script>
+</body>
+</html>

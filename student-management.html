@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management | Hostel Admin</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        .page {
+            max-width: 1250px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #102a43, #2563a6);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+        }
+
+        .header h1 {
+            margin-top: 0;
+        }
+
+        .panel {
+            background: white;
+            padding: 22px;
+            margin-top: 22px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px #00000012;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 18px 0;
+        }
+
+        .toolbar input,
+        .toolbar select {
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        .toolbar input {
+            flex: 1;
+            min-width: 220px;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1100px;
+        }
+
+        th, td {
+            padding: 13px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #f1f5f9;
+            color: #334155;
+            white-space: nowrap;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .approved {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .action-button {
+            border: none;
+            padding: 9px 12px;
+            border-radius: 7px;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 3px;
+        }
+
+        .approve-button {
+            background: #15803d;
+        }
+
+        .reject-button {
+            background: #dc2626;
+        }
+
+        .action-button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        .message {
+            margin: 15px 0;
+            color: #475569;
+        }
+
+        .back-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 18px;
+            background: #102a43;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+
+        @media (max-width: 600px) {
+            .page {
+                padding: 12px;
+                margin: 10px auto;
+            }
+
+            .header, .panel {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<main class="page">
+
+    <header class="header">
+        <h1>👨‍🎓 Student Management</h1>
+        <p>View student details and manage room allocation requests.</p>
+    </header>
+
+    <section class="panel">
+        <h2>Registered Students & Allocation</h2>
+
+        <p id="summary">Loading student records...</p>
+
+        <div class="toolbar">
+            <input
+                type="search"
+                id="searchInput"
+                placeholder="Search name, ID, email or department..."
+                aria-label="Search students"
+            >
+
+            <select id="statusFilter" aria-label="Filter student status">
+                <option value="">All Statuses</option>
+                <option value="Pending">Pending</option>
+                <option value="Approved">Approved</option>
+                <option value="Rejected">Rejected</option>
+            </select>
+        </div>
+
+        <p id="message" class="message" role="status">
+            Loading data from database...
+        </p>
+
+        <div class="table-wrap">
+            <table id="studentTable" hidden>
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Student ID</th>
+                        <th>Email</th>
+                        <th>Department</th>
+                        <th>Year</th>
+                        <th>Requested Room</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody id="studentRows"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <a href="admin-dashboard.html" class="back-button">
+        ← Back to Dashboard
+    </a>
+
+</main>
+
+<script>
+  const API_URL = "https://hostelroomallocationsystem-production-cc01.up.railway.app/api";
+
+    let students = [];
+
+    const searchInput = document.getElementById("searchInput");
+    const statusFilter = document.getElementById("statusFilter");
+    const studentTable = document.getElementById("studentTable");
+    const studentRows = document.getElementById("studentRows");
+    const summary = document.getElementById("summary");
+    const message = document.getElementById("message");
+
+    function addCell(row, value) {
+        const cell = document.createElement("td");
+        cell.textContent =
+            value === null || value === undefined || value === ""
+                ? "—"
+                : value;
+
+        row.appendChild(cell);
+        return cell;
+    }
+
+    function createStatusBadge(status) {
+        const badge = document.createElement("span");
+        badge.className = "status";
+
+        if (status === "Approved") {
+            badge.classList.add("approved");
+        } else if (status === "Rejected") {
+            badge.classList.add("rejected");
+        } else {
+            badge.classList.add("pending");
+        }
+
+        badge.textContent = status;
+        return badge;
+    }
+
+    function renderStudents() {
+        const searchText = searchInput.value.trim().toLowerCase();
+        const chosenStatus = statusFilter.value;
+
+        const filteredStudents = students.filter(student => {
+            const searchableText = [
+                student.student_name,
+                student.student_id,
+                student.student_email,
+                student.department,
+                student.study_year,
+                student.room_number
+            ].join(" ").toLowerCase();
+
+            const matchesSearch = searchableText.includes(searchText);
+            const matchesStatus =
+                !chosenStatus || student.status === chosenStatus;
+
+            return matchesSearch && matchesStatus;
+        });
+
+        studentRows.replaceChildren();
+
+        filteredStudents.forEach(student => {
+            const row = document.createElement("tr");
+
+            addCell(row, student.student_name);
+            addCell(row, student.student_id);
+            addCell(row, student.student_email);
+            addCell(row, student.department);
+            addCell(row, student.study_year);
+            addCell(row, student.room_number || "—");
+
+            const statusCell = document.createElement("td");
+            statusCell.appendChild(createStatusBadge(student.status));
+            row.appendChild(statusCell);
+
+            const actionsCell = document.createElement("td");
+
+            if (student.status === "Pending") {
+                const approveButton = document.createElement("button");
+                approveButton.className =
+                    "action-button approve-button";
+                approveButton.textContent = "Approve";
+
+                approveButton.addEventListener("click", () => {
+                    processRequest(student.id, "approve");
+                });
+
+                const rejectButton = document.createElement("button");
+                rejectButton.className =
+                    "action-button reject-button";
+                rejectButton.textContent = "Reject";
+
+                rejectButton.addEventListener("click", () => {
+                    processRequest(student.id, "reject");
+                });
+
+                actionsCell.append(approveButton, rejectButton);
+            } else {
+                actionsCell.textContent = "Processed";
+            }
+
+            row.appendChild(actionsCell);
+            studentRows.appendChild(row);
+        });
+
+        studentTable.hidden = filteredStudents.length === 0;
+
+        summary.textContent =
+            `Total records: ${students.length} | ` +
+            `Showing: ${filteredStudents.length} | ` +
+            `Pending: ${students.filter(s => s.status === "Pending").length}`;
+
+        if (students.length === 0) {
+            message.textContent =
+                "No student records found in the database yet.";
+        } else if (filteredStudents.length === 0) {
+            message.textContent =
+                "No students match your search or status filter.";
+        } else {
+            message.textContent =
+                "Approve or reject pending requests below.";
+        }
+    }
+
+    async function loadStudents() {
+        studentTable.hidden = true;
+        summary.textContent = "Loading student records...";
+        message.textContent = "Connecting to the backend...";
+
+        try {
+            const response = await fetch(
+                `${API_URL}/admin/students`
+            );
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success ||
+                !Array.isArray(data.students)) {
+                throw new Error(
+                    data.message || "Could not load student records."
+                );
+            }
+
+            students = data.students;
+            renderStudents();
+        } catch (error) {
+            summary.textContent = "Student records unavailable";
+            message.textContent =
+                "Could not load students. Check that the backend is running.";
+            console.error("Student loading error:", error);
+        }
+    }
+
+    async function processRequest(requestId, action) {
+        const isApproval = action === "approve";
+
+        const confirmed = window.confirm(
+            isApproval
+                ? "Are you sure you want to approve this room request?"
+                : "Are you sure you want to reject this room request?"
+        );
+
+        if (!confirmed) return;
+
+        message.textContent = "Processing request...";
+
+        try {
+            const response = await fetch(
+                `${API_URL}/admin/requests/${requestId}/${action}`,
+                { method: "PATCH" }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(
+                    data.message || "Unable to update request."
+                );
+            }
+
+            message.textContent = data.message;
+
+            // Reload student records to show the latest database status.
+            await loadStudents();
+
+            // Keep the success result visible after refreshing the list.
+            message.textContent = data.message;
+        } catch (error) {
+            message.textContent = error.message;
+            console.error("Allocation action error:", error);
+        }
+    }
+
+    searchInput.addEventListener("input", renderStudents);
+    statusFilter.addEventListener("change", renderStudents);
+
+    loadStudents();
+</script>
+
+</body>
+</html>

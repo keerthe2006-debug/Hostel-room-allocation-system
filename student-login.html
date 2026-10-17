@@ -1,0 +1,40 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Login</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="login-container">
+    <h1>Student Login</h1>
+    <p>Login to access your hostel room portal.</p>
+
+    <form id="studentLoginForm">
+      <label for="studentId">Student ID</label>
+      <input type="text" id="studentId" name="studentId"
+             inputmode="numeric" pattern="[0-9]+" required
+             placeholder="Enter your student ID">
+
+      <label for="studentEmail">Email Address</label>
+      <input type="email" id="studentEmail" name="studentEmail"
+             required placeholder="Enter your registered email">
+
+      <button type="submit">Login</button>
+      <p id="loginMessage" role="status"></p>
+    </form>
+
+    <p><a href="index.html">← Back to Home</a></p>
+  </main>
+
+  <script>
+    document.getElementById("studentLoginForm").addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      document.getElementById("loginMessage").textContent =
+        "Login backend setup pannina piragu activate aagum.";
+    });
+  </script>
+</body>
+</html>

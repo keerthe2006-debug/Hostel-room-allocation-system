@@ -1,0 +1,81 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="login-container">
+    <h1>Admin Login</h1>
+    <p>Enter your admin ID and password.</p>
+
+    <form id="adminLoginForm">
+      <label for="adminId">Admin ID</label>
+      <input
+        type="text"
+        id="adminId"
+        name="adminId"
+        placeholder="Enter your admin ID"
+        required
+      >
+
+      <label for="adminPassword">Password</label>
+      <input
+        type="password"
+        id="adminPassword"
+        name="password"
+        placeholder="Enter your password"
+        required
+      >
+
+      <button type="submit">Login</button>
+      <p id="adminLoginMessage" role="status"></p>
+    </form>
+
+    <p><a href="index.html">← Back to Home</a></p>
+  </main>
+
+   
+<script>
+  document.getElementById("adminLoginForm").addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    const adminId = document.getElementById("adminId").value.trim();
+    const password = document.getElementById("adminPassword").value;
+    const message = document.getElementById("adminLoginMessage");
+
+    
+    try {
+        const response = await fetch("https://hostelroomallocationsystem-production-cc01.up.railway.app/api/admin/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ adminId, password })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            message.textContent = "Login successful.";
+
+            setTimeout(() => {
+                window.location.href = "admin-dashboard.html";
+            }, 500);
+        } else {
+            message.textContent =
+                result.message || "Invalid Admin ID or Password.";
+        }
+    
+    } catch (error) {
+        message.textContent =
+            "Cannot connect to server. Please start the backend.";
+    }
+  });
+</script>
+</body>
+</html>
+</body>
+</html>

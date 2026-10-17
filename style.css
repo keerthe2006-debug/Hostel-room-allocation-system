@@ -1,0 +1,412 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-image: url("./background.jpeg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    color: #1e293b;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+h1 {
+    background-color: #102a43;
+    color: white;
+    padding: 30px 15px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+    font-size: 32px;
+}
+
+p {
+    font-size: 17px;
+    margin: 18px 0;
+    line-height: 1.6;
+}
+
+h2 {
+    color: #102a43;
+    margin-top: 35px;
+}
+
+button {
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    padding: 14px 24px;
+    margin-top: 15px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #1d4ed8;
+}
+#roomTable {
+    margin: 30px auto;
+    max-width: 800px;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: white;
+}
+
+th, td {
+    border: 1px solid #d1d5db;
+    padding: 14px;
+    text-align: center;
+}
+
+th {
+    background-color: #102a43;
+    color: white;
+}
+
+tr:nth-child(even) {
+    background-color: #eaf0f8;
+}
+#studentForm {
+    max-width: 450px;
+    margin: 25px auto;
+    padding: 25px;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    text-align: left;
+}
+
+#studentForm input,
+#studentForm select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 15px;
+}
+
+#studentForm label {
+    font-weight: bold;
+}
+
+#formMessage {
+    color: #15803d;
+    font-weight: bold;
+}
+/* Registration form spacing fix */
+main .card #studentForm {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+}
+
+main .card #studentForm label {
+    display: block !important;
+    margin: 10px 0 0 !important;
+}
+
+main .card #studentForm input,
+main .card #studentForm select {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 0 8px !important;
+    padding: 12px !important;
+    box-sizing: border-box !important;
+}
+
+main .card #studentForm button {
+    margin-top: 12px !important;
+}
+
+/* Room Change Request Section */
+#roomChangeSection {
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 25px;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    text-align: left;
+}
+
+#roomChangeSection h2 {
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+#roomChangeForm {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+#roomChangeForm label {
+    font-weight: bold;
+}
+
+#roomChangeForm select,
+#roomChangeForm textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-family: Arial, sans-serif;
+    font-size: 15px;
+}
+
+#roomChangeForm textarea {
+    resize: vertical;
+}
+
+#roomChangeForm button {
+    align-self: flex-start;
+}
+
+#changeMessage {
+    color: #15803d;
+    font-weight: bold;
+}
+
+#requestStatus {
+    margin-top: 15px;
+    padding: 15px;
+    background-color: #f3f6fb;
+    border-radius: 8px;
+    overflow-wrap: anywhere;
+}
+
+#requestStatus p {
+    font-size: 15px;
+    margin: 8px 0;
+}
+#submitChangeButton:disabled {
+    background-color: #64748b;
+    cursor: not-allowed;
+}
+#changeMessage {
+    color: green;
+    font-weight: bold;
+    margin-top: 15px;
+}
+/* Student and Admin Home Page */
+.home-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 30px 10px;
+}
+
+.home-container h1 {
+    background: transparent;
+    color: #102a43;
+    padding: 15px;
+    font-size: 36px;
+}
+
+.home-container .subtitle {
+    color: #64748b;
+    margin-bottom: 35px;
+}
+
+.portal-container {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 25px;
+    margin-top: 30px;
+}
+
+.portal-card {
+    display: block;
+    background: white;
+    padding: 35px 25px;
+    border-radius: 18px;
+    text-decoration: none;
+    color: #1e293b;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.10);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.portal-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.15);
+}
+
+.portal-icon {
+    font-size: 52px;
+    margin-bottom: 15px;
+}
+
+.portal-card h2 {
+    margin: 10px 0;
+}
+
+.portal-card p {
+    color: #64748b;
+}
+
+.portal-button {
+    display: inline-block;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.student-card .portal-button {
+    background: #2563eb;
+}
+
+.admin-card .portal-button {
+    background: #7c3aed;
+}
+
+.footer-text {
+    color: #64748b;
+    font-size: 14px;
+    margin-top: 35px;
+}
+
+@media (max-width: 600px) {
+    .portal-container {
+        grid-template-columns: 1fr;
+    }
+
+    .home-container h1 {
+        font-size: 28px;
+    }
+}
+ 
+/* Student Login Page */
+.login-container {
+    max-width: 450px;
+    margin: 40px auto;
+    padding: 30px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.10);
+    text-align: left;
+}
+
+.login-container h1 {
+    background: #102a43;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    font-size: 28px;
+}
+
+.login-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 25px;
+}
+
+.login-container label {
+    font-weight: bold;
+}
+
+.login-container input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+    font-size: 15px;
+}
+
+.login-container button {
+    width: 100%;
+    margin-top: 10px;
+}
+
+.login-container a {
+    color: #2563eb;
+    text-decoration: none;
+}
+
+.login-container a:hover {
+    text-decoration: underline;
+}
+
+#loginMessage {
+    color: #b45309;
+    font-size: 14px;
+}
+ 
+.admin-login-link {
+    display: inline-block;
+    background-color: #102a43;
+    color: white;
+    text-decoration: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.admin-login-link:hover {
+    background-color: #2563eb;
+}
+/* Improve text visibility over the hostel background image */
+
+#roomSection,
+#allocationSection,
+#roomChangeSection {
+    background: rgba(255, 255, 255, 0.95);
+    color: #102a43;
+    max-width: 1000px;
+    margin: 24px auto;
+    padding: 28px;
+    border-radius: 14px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+}
+
+#roomSection h1,
+#roomSection h2,
+#roomSection h3,
+#roomSection p,
+#roomSection label,
+#allocationSection h1,
+#allocationSection h2,
+#allocationSection h3,
+#allocationSection p,
+#roomChangeSection h1,
+#roomChangeSection h2,
+#roomChangeSection h3,
+#roomChangeSection p,
+#roomChangeSection label {
+    color: #102a43;
+}
+
+#formMessage {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.95);
+    color: #166534;
+    padding: 10px 16px;
+    margin: 12px auto;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+#roomTable {
+    overflow-x: auto;
+}
+
+@media (max-width: 600px) {
+    #roomSection,
+    #allocationSection,
+    #roomChangeSection {
+        margin: 14px 10px;
+        padding: 18px;
+    }
+}
